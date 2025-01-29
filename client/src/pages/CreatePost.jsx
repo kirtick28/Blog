@@ -106,7 +106,7 @@ const CreatePost = () => {
 
       // Wait for 1.5 seconds to show the success message before navigating
       setTimeout(() => {
-        navigate('/my-posts');
+        navigate('/dashboard');
       }, 1500);
 
     } catch (error) {
