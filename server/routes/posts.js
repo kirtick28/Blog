@@ -43,11 +43,6 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Check if user is authorized to edit this post
-    if (post.author._id.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Not authorized to view this post' });
-    }
-
     res.json(post);
   } catch (err) {
     console.error(err.message);
@@ -139,6 +134,11 @@ router.put('/like/:id', auth, async (req, res) => {
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Check if user is trying to like their own post
+    if (post.author.toString() === req.user.id) {
+      return res.status(400).json({ message: "You can't like your own post" });
     }
 
     // Check if post has already been liked by this user
