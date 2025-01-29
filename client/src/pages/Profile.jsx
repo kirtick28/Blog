@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import '../styles/Profile.css';
 
 const Profile = () => {
-  const [profile, setProfile] = useState({
+  const [user, setUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
     username: '',
     email: '',
     bio: '',
     location: '',
-    profilePic: '',
     socialLinks: {
       twitter: '',
       linkedin: '',
-      github: ''
-    }
+      github: '',
+      instagram: ''
+    },
+    profilePicture: ''
   });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({});
 
   useEffect(() => {
     fetchProfile();
@@ -25,38 +28,43 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/profile', {
+      const response = await axios.get('http://localhost:5000/api/users/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProfile(response.data);
-      setEditedProfile(response.data);
+      setUser(response.data);
+      setFormData({
+        username: response.data.username || '',
+        email: response.data.email || '',
+        bio: response.data.bio || '',
+        location: response.data.location || '',
+        socialLinks: {
+          twitter: response.data.socialLinks?.twitter || '',
+          linkedin: response.data.socialLinks?.linkedin || '',
+          github: response.data.socialLinks?.github || '',
+          instagram: response.data.socialLinks?.instagram || ''
+        },
+        profilePicture: response.data.profilePicture || ''
+      });
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      toast.error('Error loading profile');
+      setLoading(false);
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedProfile(profile);
-  };
-
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setEditedProfile(prev => ({
+    if (name.startsWith('social-')) {
+      const platform = name.split('-')[1];
+      setFormData(prev => ({
         ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
+        socialLinks: {
+          ...prev.socialLinks,
+          [platform]: value
         }
       }));
     } else {
-      setEditedProfile(prev => ({
+      setFormData(prev => ({
         ...prev,
         [name]: value
       }));
@@ -69,178 +77,212 @@ const Profile = () => {
       const token = localStorage.getItem('token');
       const response = await axios.put(
         'http://localhost:5000/api/users/profile',
-        editedProfile,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        formData,
+        { headers: { Authorization: `Bearer ${token}` }}
       );
-      setProfile(response.data);
+      setUser(response.data);
       setIsEditing(false);
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      console.error('Error updating profile:', error);
+      toast.error(error.response?.data?.message || 'Error updating profile');
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.put(
-          'http://localhost:5000/api/users/profile-picture',
-          { profilePic: reader.result },
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
-        setProfile(prev => ({ ...prev, profilePic: response.data.profilePic }));
-        setEditedProfile(prev => ({ ...prev, profilePic: response.data.profilePic }));
-      } catch (error) {
-        console.error('Error uploading profile picture:', error);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <div className="profile-pic-container">
-          <img 
-            src={profile.profilePic || 'https://via.placeholder.com/150'} 
-            alt={profile.username}
-            className="profile-pic"
-          />
-          {isEditing && (
-            <div className="profile-pic-overlay">
-              <label htmlFor="profile-pic-upload" className="upload-btn">
-                Change Photo
-              </label>
-              <input
-                id="profile-pic-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
+        <div className="profile-picture">
+          {user.profilePicture ? (
+            <img src={user.profilePicture} alt={user.username} />
+          ) : (
+            <i className="fas fa-user"></i>
           )}
         </div>
         <div className="profile-info">
-          <h1>{profile.username}</h1>
-          <p>{profile.bio || 'No bio yet'}</p>
+          <h1>{user.username}</h1>
+          <p className="join-date">
+            Joined {new Date(user.joinedDate).toLocaleDateString('en-US', {
+              month: 'long',
+              year: 'numeric'
+            })}
+          </p>
         </div>
-        {!isEditing && (
-          <button className="edit-btn" onClick={handleEdit}>
-            Edit Profile
-          </button>
-        )}
+        <button 
+          className="edit-profile-btn"
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          {isEditing ? (
+            <>
+              <i className="fas fa-times"></i>
+              Cancel
+            </>
+          ) : (
+            <>
+              <i className="fas fa-edit"></i>
+              Edit Profile
+            </>
+          )}
+        </button>
       </div>
 
       {isEditing ? (
-        <form className="profile-form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="profile-form">
           <div className="form-group">
             <label>Username</label>
             <input
               type="text"
               name="username"
-              value={editedProfile.username || ''}
-              onChange={handleChange}
+              value={formData.username}
+              onChange={handleInputChange}
+              placeholder="Username"
             />
           </div>
+
           <div className="form-group">
             <label>Email</label>
             <input
               type="email"
               name="email"
-              value={editedProfile.email || ''}
-              onChange={handleChange}
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email"
             />
           </div>
+
           <div className="form-group">
             <label>Bio</label>
             <textarea
               name="bio"
-              value={editedProfile.bio || ''}
-              onChange={handleChange}
+              value={formData.bio}
+              onChange={handleInputChange}
+              placeholder="Tell us about yourself"
+              rows="4"
             />
           </div>
+
           <div className="form-group">
             <label>Location</label>
             <input
               type="text"
               name="location"
-              value={editedProfile.location || ''}
-              onChange={handleChange}
+              value={formData.location}
+              onChange={handleInputChange}
+              placeholder="Your location"
             />
           </div>
-          <div className="social-links">
+
+          <div className="form-group">
+            <label>Profile Picture URL</label>
+            <input
+              type="text"
+              name="profilePicture"
+              value={formData.profilePicture}
+              onChange={handleInputChange}
+              placeholder="URL to your profile picture"
+            />
+          </div>
+
+          <div className="social-links-form">
             <h3>Social Links</h3>
             <div className="form-group">
-              <label>Twitter</label>
+              <label><i className="fab fa-twitter"></i> Twitter</label>
               <input
-                type="url"
-                name="socialLinks.twitter"
-                value={editedProfile.socialLinks?.twitter || ''}
-                onChange={handleChange}
+                type="text"
+                name="social-twitter"
+                value={formData.socialLinks.twitter}
+                onChange={handleInputChange}
+                placeholder="Twitter profile URL"
               />
             </div>
+
             <div className="form-group">
-              <label>LinkedIn</label>
+              <label><i className="fab fa-linkedin"></i> LinkedIn</label>
               <input
-                type="url"
-                name="socialLinks.linkedin"
-                value={editedProfile.socialLinks?.linkedin || ''}
-                onChange={handleChange}
+                type="text"
+                name="social-linkedin"
+                value={formData.socialLinks.linkedin}
+                onChange={handleInputChange}
+                placeholder="LinkedIn profile URL"
               />
             </div>
+
             <div className="form-group">
-              <label>GitHub</label>
+              <label><i className="fab fa-github"></i> GitHub</label>
               <input
-                type="url"
-                name="socialLinks.github"
-                value={editedProfile.socialLinks?.github || ''}
-                onChange={handleChange}
+                type="text"
+                name="social-github"
+                value={formData.socialLinks.github}
+                onChange={handleInputChange}
+                placeholder="GitHub profile URL"
+              />
+            </div>
+
+            <div className="form-group">
+              <label><i className="fab fa-instagram"></i> Instagram</label>
+              <input
+                type="text"
+                name="social-instagram"
+                value={formData.socialLinks.instagram}
+                onChange={handleInputChange}
+                placeholder="Instagram profile URL"
               />
             </div>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="save-btn">Save Changes</button>
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
-              Cancel
-            </button>
-          </div>
+
+          <button type="submit" className="save-btn">
+            <i className="fas fa-save"></i>
+            Save Changes
+          </button>
         </form>
       ) : (
         <div className="profile-details">
           <div className="detail-section">
-            <h3>About</h3>
-            <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>Location:</strong> {profile.location || 'Not specified'}</p>
+            <h3><i className="fas fa-info-circle"></i> About</h3>
+            <p>{user.bio || 'No bio added yet'}</p>
           </div>
-          {profile.socialLinks && Object.values(profile.socialLinks).some(link => link) && (
-            <div className="detail-section">
-              <h3>Social Links</h3>
-              {profile.socialLinks.twitter && (
-                <a href={profile.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
-                  Twitter
+
+          <div className="detail-section">
+            <h3><i className="fas fa-map-marker-alt"></i> Location</h3>
+            <p>{user.location || 'No location added'}</p>
+          </div>
+
+          <div className="detail-section">
+            <h3><i className="fas fa-link"></i> Social Links</h3>
+            <div className="social-links">
+              {user.socialLinks?.twitter && (
+                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                  <i className="fab fa-twitter"></i>
                 </a>
               )}
-              {profile.socialLinks.linkedin && (
-                <a href={profile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
-                  LinkedIn
+              {user.socialLinks?.linkedin && (
+                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                  <i className="fab fa-linkedin"></i>
                 </a>
               )}
-              {profile.socialLinks.github && (
-                <a href={profile.socialLinks.github} target="_blank" rel="noopener noreferrer">
-                  GitHub
+              {user.socialLinks?.github && (
+                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer">
+                  <i className="fab fa-github"></i>
                 </a>
+              )}
+              {user.socialLinks?.instagram && (
+                <a href={user.socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                  <i className="fab fa-instagram"></i>
+                </a>
+              )}
+              {!Object.values(user.socialLinks || {}).some(link => link) && (
+                <p className="no-links">No social links added</p>
               )}
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

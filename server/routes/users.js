@@ -127,44 +127,36 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
-// Update User Profile
-router.put('/profile', auth, async (req, res) => {
+// Get current user profile
+router.get('/me', auth, async (req, res) => {
   try {
-    const { username, email, bio } = req.body;
-    const user = await User.findById(req.user.id);
-
-    if (username) user.username = username;
-    if (email) user.email = email;
-    if (bio) user.bio = bio;
-
-    await user.save();
+    const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-// Get user profile
-router.get('/profile', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching profile' });
+    res.status(500).send('Server Error');
   }
 });
 
 // Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { username, email, bio, location, socialLinks } = req.body;
-    const user = await User.findById(req.user.id);
-    
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const {
+      username,
+      email,
+      bio,
+      location,
+      socialLinks,
+      profilePicture
+    } = req.body;
 
-    // Check if username or email is being changed and if it's already taken
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if username is being changed and if it's already taken
     if (username && username !== user.username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) {
@@ -173,6 +165,7 @@ router.put('/profile', auth, async (req, res) => {
       user.username = username;
     }
 
+    // Check if email is being changed and if it's already taken
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -184,13 +177,48 @@ router.put('/profile', auth, async (req, res) => {
     // Update other fields
     if (bio) user.bio = bio;
     if (location) user.location = location;
-    if (socialLinks) user.socialLinks = socialLinks;
+    if (socialLinks) {
+      user.socialLinks = {
+        ...user.socialLinks,
+        ...socialLinks
+      };
+    }
+    if (profilePicture) user.profilePicture = profilePicture;
 
     await user.save();
     const updatedUser = await User.findById(user._id).select('-password');
     res.json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating profile' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// Change password
+router.put('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 });
 

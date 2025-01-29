@@ -5,24 +5,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true,
-    minlength: 3
+    trim: true
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    trim: true,
-    lowercase: true
+    trim: true
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
-  },
-  profilePic: {
-    type: String,
-    default: ''
+    required: true
   },
   bio: {
     type: String,
@@ -33,9 +26,18 @@ const userSchema = new mongoose.Schema({
     default: ''
   },
   socialLinks: {
-    twitter: String,
-    linkedin: String,
-    github: String
+    twitter: { type: String, default: '' },
+    linkedin: { type: String, default: '' },
+    github: { type: String, default: '' },
+    instagram: { type: String, default: '' }
+  },
+  profilePicture: {
+    type: String,
+    default: ''
+  },
+  joinedDate: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true
