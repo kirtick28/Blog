@@ -1,51 +1,59 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../styles/Layout.css';
 
 const Layout = ({ children }) => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const currentPath = location.pathname;
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    toast.success('Logged out successfully');
     navigate('/login');
   };
 
-  const navItems = [
-    { path: '/home', label: 'Home', icon: '🏠' },
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/create-post', label: 'Create Post', icon: '✍️' },
-    { path: '/profile', label: 'Profile', icon: '👤' },
-  ];
-
   return (
     <div className="layout">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>BlogWeb</h2>
+      <nav className="navbar">
+        <div className="nav-brand">
+          <Link to="/home">BlogWeb</Link>
         </div>
-        <nav className="sidebar-nav">
-          <ul>
-            {navItems.map((item, index) => (
-              <li
-                key={item.path}
-                className={currentPath === item.path ? 'active' : ''}
-                onClick={() => navigate(item.path)}
-                style={{ '--item-index': index }}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </li>
-            ))}
-            <li className="logout" onClick={handleLogout}>
-              <span className="nav-icon">🚪</span>
-              <span>Logout</span>
-            </li>
-          </ul>
-        </nav>
-      </div>
+        <div className="nav-links">
+          <Link 
+            to="/home" 
+            className={location.pathname === '/home' ? 'active' : ''}
+          >
+            <i className="fas fa-home"></i>
+            <span>Home</span>
+          </Link>
+          <Link 
+            to="/dashboard" 
+            className={location.pathname === '/dashboard' ? 'active' : ''}
+          >
+            <i className="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+          </Link>
+          <Link 
+            to="/create-post" 
+            className={location.pathname === '/create-post' ? 'active' : ''}
+          >
+            <i className="fas fa-pen-to-square"></i>
+            <span>Create Post</span>
+          </Link>
+          <Link 
+            to="/profile" 
+            className={location.pathname === '/profile' ? 'active' : ''}
+          >
+            <i className="fas fa-user"></i>
+            <span>Profile</span>
+          </Link>
+          <button onClick={handleLogout} className="logout-btn">
+            <i className="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
       <main className="main-content">
         {children}
       </main>
