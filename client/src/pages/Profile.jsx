@@ -75,15 +75,23 @@ const Profile = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
+      
+      // Ensure profilePicture is included in the request even if empty
+      const updatedData = {
+        ...formData,
+        profilePicture: formData.profilePicture || ''
+      };
+
       const response = await axios.put(
         'http://localhost:5000/api/users/profile',
-        formData,
+        updatedData,
         { headers: { Authorization: `Bearer ${token}` }}
       );
       setUser(response.data);
       setIsEditing(false);
       toast.success('Profile updated successfully!');
     } catch (error) {
+      console.error('Profile update error:', error);
       toast.error(error.response?.data?.message || 'Error updating profile');
     }
   };

@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Post = require('../models/Post');
 const User = require('../models/User');
+const { uploadImage } = require('../utils/cloudinary');
 
 // Get all posts
 router.get('/', auth, async (req, res) => {
@@ -56,18 +57,25 @@ router.get('/:id', auth, async (req, res) => {
 // Create a post
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, content, image } = req.body;
+    const { title, content, image, tags } = req.body;
 
-    const newPost = new Post({
-      title,
+    // Upload image to Cloudinary if provided
+    let imageUrl = '';
+    if (image) {
+      imageUrl = await uploadImage(image);
+    }
+
+    const post = new Post({
+      title: title.trim(),
       content,
-      image,
-      author: req.user.id
+      image: imageUrl,
+      author: req.user.id,
+      tags: tags || []
     });
 
-    const post = await newPost.save();
-    await post.populate('author', 'username');
-    res.json(post);
+    const savedPost = await post.save();
+    await savedPost.populate('author', 'username');
+    res.status(201).json(savedPost);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -77,7 +85,7 @@ router.post('/', auth, async (req, res) => {
 // Update a post
 router.put('/:id', auth, async (req, res) => {
   try {
-    const { title, content, image } = req.body;
+    const { title, content, image, tags } = req.body;
     const post = await Post.findById(req.params.id);
 
     if (!post) {
@@ -89,10 +97,16 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
-    post.title = title || post.title;
-    post.content = content || post.content;
-    post.image = image || post.image;
-    post.updatedAt = Date.now();
+    // Upload new image if provided and different from current
+    let imageUrl = post.image;
+    if (image && image !== post.image) {
+      imageUrl = await uploadImage(image);
+    }
+
+    post.title = title.trim();
+    post.content = content;
+    post.image = imageUrl;
+    post.tags = tags || [];
 
     await post.save();
     await post.populate('author', 'username');

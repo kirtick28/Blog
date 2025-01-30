@@ -91,7 +91,6 @@ const CreatePost = () => {
           { headers: { Authorization: `Bearer ${token}` }}
         );
       } else {
-        // Create new post
         response = await axios.post(
           'http://localhost:5000/api/posts',
           post,
@@ -119,7 +118,7 @@ const CreatePost = () => {
   };
 
   const handleCancel = () => {
-    navigate('/my-posts');
+    navigate('/dashboard');
   };
 
   if (loading && id) {

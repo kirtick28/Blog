@@ -11,6 +11,11 @@ router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
     // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
@@ -183,7 +188,11 @@ router.put('/profile', auth, async (req, res) => {
         ...socialLinks
       };
     }
-    if (profilePicture) user.profilePicture = profilePicture;
+    // Handle profile picture update (including empty string)
+    if (profilePicture !== undefined) {
+      user.profilePicture = profilePicture;
+    }
+    console.log('Updated profile picture:', user.profilePicture);
 
     await user.save();
     const updatedUser = await User.findById(user._id).select('-password');
