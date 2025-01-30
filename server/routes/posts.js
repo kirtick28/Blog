@@ -57,7 +57,7 @@ router.get('/:id', auth, async (req, res) => {
 // Create a post
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, content, image, tags } = req.body;
+    const { title, content, image, learnMoreUrl } = req.body;
 
     // Upload image to Cloudinary if provided
     let imageUrl = '';
@@ -70,7 +70,7 @@ router.post('/', auth, async (req, res) => {
       content,
       image: imageUrl,
       author: req.user.id,
-      tags: tags || []
+      learnMoreUrl
     });
 
     const savedPost = await post.save();
@@ -85,7 +85,7 @@ router.post('/', auth, async (req, res) => {
 // Update a post
 router.put('/:id', auth, async (req, res) => {
   try {
-    const { title, content, image, tags } = req.body;
+    const { title, content, image, learnMoreUrl } = req.body;
     const post = await Post.findById(req.params.id);
 
     if (!post) {
@@ -106,7 +106,7 @@ router.put('/:id', auth, async (req, res) => {
     post.title = title.trim();
     post.content = content;
     post.image = imageUrl;
-    post.tags = tags || [];
+    post.learnMoreUrl = learnMoreUrl;
 
     await post.save();
     await post.populate('author', 'username');

@@ -9,7 +9,8 @@ const CreatePost = () => {
   const [post, setPost] = useState({
     title: '',
     content: '',
-    image: ''
+    image: '',
+    learnMoreUrl: ''
   });
   const [preview, setPreview] = useState('');
   const [loading, setLoading] = useState(false);
@@ -168,6 +169,18 @@ const CreatePost = () => {
             onChange={handleChange}
             placeholder="Write your story..."
             required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="learnMoreUrl">Learn More URL (Optional)</label>
+          <input
+            type="url"
+            id="learnMoreUrl"
+            name="learnMoreUrl"
+            value={post.learnMoreUrl}
+            onChange={handleChange}
+            placeholder="https://example.com"
           />
         </div>
 

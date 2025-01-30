@@ -155,6 +155,17 @@ const BlogPost = () => {
           {post.content}
         </div>
 
+        {post.learnMoreUrl && (
+          <a 
+            href={post.learnMoreUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="learn-more-btn"
+          >
+            Learn More
+          </a>
+        )}
+
         <div className="comments-section">
           <h2>Comments ({post.comments.length})</h2>
           

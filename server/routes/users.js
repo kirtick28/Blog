@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
+const upload = require('../utils/multer');
+const { uploadImage } = require('../utils/cloudinary');
 const User = require('../models/User');
 const Post = require('../models/Post');
 
@@ -245,6 +247,26 @@ router.put('/profile-picture', auth, async (req, res) => {
     res.json({ profilePic: user.profilePic });
   } catch (error) {
     res.status(500).json({ message: 'Error updating profile picture' });
+  }
+});
+
+// Update profile photo
+router.put('/profile-photo', auth, upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No photo uploaded' });
+    }
+
+    const imageUrl = await uploadImage(req.file.buffer, 'profile_photos');
+    
+    const user = await User.findById(req.user.id);
+    user.profilePhoto = imageUrl;
+    await user.save();
+
+    res.json({ profilePhoto: imageUrl });
+  } catch (error) {
+    console.error('Error updating profile photo:', error);
+    res.status(500).json({ message: 'Error updating profile photo' });
   }
 });
 
