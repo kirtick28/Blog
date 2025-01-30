@@ -7,6 +7,12 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -94,6 +100,44 @@ const Profile = () => {
       console.error('Profile update error:', error);
       toast.error(error.response?.data?.message || 'Error updating profile');
     }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match!');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        'http://localhost:5000/api/users/change-password',
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        },
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+      
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordForm(false);
+      toast.success('Password updated successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error changing password');
+    }
+  };
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   if (loading) {
@@ -197,6 +241,57 @@ const Profile = () => {
               onChange={handleInputChange}
               placeholder="URL to your profile picture"
             />
+          </div>
+
+          <div className="form-group">
+            <button type="button" 
+              className="change-password-btn"
+              onClick={() => setShowPasswordForm(!showPasswordForm)}
+            >
+              {showPasswordForm ? 'Cancel Password Change' : 'Change Password'}
+            </button>
+
+            {showPasswordForm && (
+              <div className="password-change-section">
+                <div className="form-group">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>New Password</label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Confirm New Password</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <button 
+                  type="button"
+                  className="submit-password-btn"
+                  onClick={handlePasswordChange}
+                >
+                  Update Password
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="social-links-form">

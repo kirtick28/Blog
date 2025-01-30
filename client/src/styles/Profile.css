@@ -263,6 +263,52 @@
   font-weight: 500;
 }
 
+.password-change-section {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.change-password-btn, .submit-password-btn {
+  background: #00ffff;
+  color: #2a2a2a;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+}
+
+.change-password-btn:hover, .submit-password-btn:hover {
+  background: #00cccc;
+  transform: translateY(-2px);
+}
+
+/* .submit-password-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+  width: 100%;
+}
+
+.submit-password-btn:hover {
+  background-color: #218838;
+} */
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .profile-header {
