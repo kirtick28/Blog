@@ -29,9 +29,12 @@ const Home = () => {
   const fetchPosts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/posts', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/posts`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       setPosts(response.data);
     } catch (error) {
       toast.error('Error loading posts');
@@ -41,9 +44,11 @@ const Home = () => {
   };
 
   const handleLike = (postId, newLikes) => {
-    setPosts(posts.map(post => 
-      post._id === postId ? { ...post, likes: newLikes } : post
-    ));
+    setPosts(
+      posts.map((post) =>
+        post._id === postId ? { ...post, likes: newLikes } : post
+      )
+    );
   };
 
   if (loading) {
@@ -58,14 +63,14 @@ const Home = () => {
   return (
     <div className="home-container">
       <h1 className="home-title">Blog Feed</h1>
-      
+
       {posts.length === 0 ? (
         <div className="no-posts">
           <p>No posts yet. Be the first to create a post!</p>
         </div>
       ) : (
         <div className="posts-grid">
-          {posts.map(post => (
+          {posts.map((post) => (
             <PostCard
               key={post._id}
               post={post}

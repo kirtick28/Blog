@@ -14,7 +14,7 @@ const Feed = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/posts/feed');
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/feed`);
       setPosts(response.data);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -24,7 +24,7 @@ const Feed = () => {
   const handleLike = async (postId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:5000/api/posts/${postId}/like`, {}, {
+      await axios.post(`${process.env.REACT_APP_BASE_URL}/posts/${postId}/like`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchPosts(); // Refresh posts to update likes
@@ -36,7 +36,7 @@ const Feed = () => {
   const handleComment = async (postId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:5000/api/posts/${postId}/comment`, 
+      await axios.post(`${process.env.REACT_APP_BASE_URL}/posts/${postId}/comment`, 
         { content: comment },
         { headers: { Authorization: `Bearer ${token}` }}
       );

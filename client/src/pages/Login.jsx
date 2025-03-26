@@ -22,21 +22,24 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/login`,
+        formData
+      );
       const { token, username } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('username', username);
-      
+
       // Set axios default header for future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
       setError(
-        error.response?.data?.message || 
-        'An error occurred during login. Please try again.'
+        error.response?.data?.message ||
+          'An error occurred during login. Please try again.'
       );
     }
   };

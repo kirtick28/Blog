@@ -32,7 +32,7 @@ const BlogPost = () => {
   const fetchPost = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/posts/${id}`, {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPost(response.data);
@@ -53,7 +53,7 @@ const BlogPost = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/posts/comment/${id}`,
+        `${process.env.REACT_APP_BASE_URL}/posts/comment/${id}`,
         { text: comment },
         { headers: { Authorization: `Bearer ${token}` }}
       );
@@ -69,7 +69,7 @@ const BlogPost = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        `http://localhost:5000/api/posts/like/${id}`,
+        `${process.env.REACT_APP_BASE_URL}/posts/like/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }}
       );

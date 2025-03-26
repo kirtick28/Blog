@@ -15,9 +15,12 @@ const MyPosts = () => {
   const fetchMyPosts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/posts/my-posts', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/posts/my-posts`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       setPosts(response.data);
       setLoading(false);
     } catch (error) {
@@ -34,9 +37,12 @@ const MyPosts = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.delete(
+          `${process.env.REACT_APP_BASE_URL}/posts/${postId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
         fetchMyPosts(); // Refresh the posts list
       } catch (error) {
         console.error('Error deleting post:', error);
@@ -66,7 +72,7 @@ const MyPosts = () => {
     <div className="my-posts-container">
       <div className="my-posts-header">
         <h1>My Posts</h1>
-        <button 
+        <button
           className="create-post-btn"
           onClick={() => navigate('/create-post')}
         >
@@ -92,20 +98,22 @@ const MyPosts = () => {
                 <h2>{post.title}</h2>
                 <p className="post-text">{post.content}</p>
                 <div className="post-meta">
-                  <span className="post-date">{formatDate(post.createdAt)}</span>
+                  <span className="post-date">
+                    {formatDate(post.createdAt)}
+                  </span>
                   <div className="post-stats">
                     <span>❤ {post.likes.length}</span>
                     <span>💬 {post.comments.length}</span>
                   </div>
                 </div>
                 <div className="post-actions">
-                  <button 
+                  <button
                     className="edit-btn"
                     onClick={() => handleEdit(post._id)}
                   >
                     Edit
                   </button>
-                  <button 
+                  <button
                     className="delete-btn"
                     onClick={() => handleDelete(post._id)}
                   >

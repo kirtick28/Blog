@@ -16,23 +16,23 @@ const PostCard = ({ post, currentUserId, onLike }) => {
       setIsLiking(true);
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        `http://localhost:5000/api/posts/like/${post._id}`,
+        `${process.env.REACT_APP_BASE_URL}/posts/like/${post._id}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       onLike(post._id, response.data);
     } catch (error) {
       if (error.response?.status === 400) {
         toast.warning(error.response.data.message, {
-          position: "top-center",
+          position: 'top-center',
           autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
-          icon: "🚫"
+          theme: 'dark',
+          icon: '🚫'
         });
       } else {
         toast.error('Error liking post');
@@ -55,10 +55,10 @@ const PostCard = ({ post, currentUserId, onLike }) => {
           <img src={post.image} alt={post.title} />
         </div>
       )}
-      
+
       <div className="post-content">
         <h2 className="post-title">{post.title}</h2>
-        
+
         <div className="post-meta">
           <span className="post-author">By {post.author.username}</span>
           <span className="post-date">
@@ -71,14 +71,16 @@ const PostCard = ({ post, currentUserId, onLike }) => {
         </div>
 
         <div className="post-preview">
-          {post.content.length > 150 
-            ? `${post.content.substring(0, 150)}...` 
+          {post.content.length > 150
+            ? `${post.content.substring(0, 150)}...`
             : post.content}
         </div>
 
-        <div className="post-actions" onClick={e => e.stopPropagation()}>
-          <button 
-            className={`like-button ${post.likes.includes(currentUserId) ? 'liked' : ''}`}
+        <div className="post-actions" onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`like-button ${
+              post.likes.includes(currentUserId) ? 'liked' : ''
+            }`}
             onClick={handleLike}
             title={isAuthor ? "You can't like your own post" : ''}
           >

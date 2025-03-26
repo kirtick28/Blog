@@ -26,7 +26,7 @@ const CreatePost = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/posts/${id}`, {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -87,13 +87,13 @@ const CreatePost = () => {
       if (id) {
         // Update existing post
         response = await axios.put(
-          `http://localhost:5000/api/posts/${id}`, 
+          `${process.env.REACT_APP_BASE_URL}/posts/${id}`, 
           post,
           { headers: { Authorization: `Bearer ${token}` }}
         );
       } else {
         response = await axios.post(
-          'http://localhost:5000/api/posts',
+          `${process.env.REACT_APP_BASE_URL}/posts`,
           post,
           { headers: { Authorization: `Bearer ${token}` }}
         );

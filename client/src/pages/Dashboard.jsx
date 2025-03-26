@@ -22,7 +22,7 @@ const Dashboard = () => {
   const fetchUserStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/stats', {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/users/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(response.data);
@@ -34,7 +34,7 @@ const Dashboard = () => {
   const fetchMyPosts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/posts/my-posts', {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/posts/my-posts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPosts(response.data);
@@ -53,7 +53,7 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
+        await axios.delete(`${process.env.REACT_APP_BASE_URL}/posts/${postId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMessage({ text: 'Post deleted successfully!', type: 'success' });

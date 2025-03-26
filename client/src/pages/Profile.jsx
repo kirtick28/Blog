@@ -34,9 +34,12 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/users/me`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       setUser(response.data);
       setFormData({
         username: response.data.username || '',
@@ -62,7 +65,7 @@ const Profile = () => {
     const { name, value } = e.target;
     if (name.startsWith('social-')) {
       const platform = name.split('-')[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         socialLinks: {
           ...prev.socialLinks,
@@ -70,7 +73,7 @@ const Profile = () => {
         }
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value
       }));
@@ -81,7 +84,7 @@ const Profile = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      
+
       // Ensure profilePicture is included in the request even if empty
       const updatedData = {
         ...formData,
@@ -89,9 +92,9 @@ const Profile = () => {
       };
 
       const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
+        `${process.env.REACT_APP_BASE_URL}/users/profile`,
         updatedData,
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setUser(response.data);
       setIsEditing(false);
@@ -112,14 +115,14 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        'http://localhost:5000/api/users/change-password',
+        `${process.env.REACT_APP_BASE_URL}/users/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
         },
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -134,7 +137,7 @@ const Profile = () => {
 
   const handlePasswordInputChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({
+    setPasswordData((prev) => ({
       ...prev,
       [name]: value
     }));
@@ -162,13 +165,14 @@ const Profile = () => {
         <div className="profile-info">
           <h1>{user.username}</h1>
           <p className="join-date">
-            Joined {new Date(user.joinedDate).toLocaleDateString('en-US', {
+            Joined{' '}
+            {new Date(user.joinedDate).toLocaleDateString('en-US', {
               month: 'long',
               year: 'numeric'
             })}
           </p>
         </div>
-        <button 
+        <button
           className="edit-profile-btn"
           onClick={() => setIsEditing(!isEditing)}
         >
@@ -244,7 +248,8 @@ const Profile = () => {
           </div>
 
           <div className="form-group">
-            <button type="button" 
+            <button
+              type="button"
               className="change-password-btn"
               onClick={() => setShowPasswordForm(!showPasswordForm)}
             >
@@ -283,7 +288,7 @@ const Profile = () => {
                     placeholder="Confirm new password"
                   />
                 </div>
-                <button 
+                <button
                   type="button"
                   className="submit-password-btn"
                   onClick={handlePasswordChange}
@@ -297,7 +302,9 @@ const Profile = () => {
           <div className="social-links-form">
             <h3>Social Links</h3>
             <div className="form-group">
-              <label><i className="fab fa-twitter"></i> Twitter</label>
+              <label>
+                <i className="fab fa-twitter"></i> Twitter
+              </label>
               <input
                 type="text"
                 name="social-twitter"
@@ -308,7 +315,9 @@ const Profile = () => {
             </div>
 
             <div className="form-group">
-              <label><i className="fab fa-linkedin"></i> LinkedIn</label>
+              <label>
+                <i className="fab fa-linkedin"></i> LinkedIn
+              </label>
               <input
                 type="text"
                 name="social-linkedin"
@@ -319,7 +328,9 @@ const Profile = () => {
             </div>
 
             <div className="form-group">
-              <label><i className="fab fa-github"></i> GitHub</label>
+              <label>
+                <i className="fab fa-github"></i> GitHub
+              </label>
               <input
                 type="text"
                 name="social-github"
@@ -330,7 +341,9 @@ const Profile = () => {
             </div>
 
             <div className="form-group">
-              <label><i className="fab fa-instagram"></i> Instagram</label>
+              <label>
+                <i className="fab fa-instagram"></i> Instagram
+              </label>
               <input
                 type="text"
                 name="social-instagram"
@@ -349,39 +362,61 @@ const Profile = () => {
       ) : (
         <div className="profile-details">
           <div className="detail-section">
-            <h3><i className="fas fa-info-circle"></i> About</h3>
+            <h3>
+              <i className="fas fa-info-circle"></i> About
+            </h3>
             <p>{user.bio || 'No bio added yet'}</p>
           </div>
 
           <div className="detail-section">
-            <h3><i className="fas fa-map-marker-alt"></i> Location</h3>
+            <h3>
+              <i className="fas fa-map-marker-alt"></i> Location
+            </h3>
             <p>{user.location || 'No location added'}</p>
           </div>
 
           <div className="detail-section">
-            <h3><i className="fas fa-link"></i> Social Links</h3>
+            <h3>
+              <i className="fas fa-link"></i> Social Links
+            </h3>
             <div className="social-links">
               {user.socialLinks?.twitter && (
-                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={user.socialLinks.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <i className="fab fa-twitter"></i>
                 </a>
               )}
               {user.socialLinks?.linkedin && (
-                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={user.socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <i className="fab fa-linkedin"></i>
                 </a>
               )}
               {user.socialLinks?.github && (
-                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={user.socialLinks.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <i className="fab fa-github"></i>
                 </a>
               )}
               {user.socialLinks?.instagram && (
-                <a href={user.socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={user.socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <i className="fab fa-instagram"></i>
                 </a>
               )}
-              {!Object.values(user.socialLinks || {}).some(link => link) && (
+              {!Object.values(user.socialLinks || {}).some((link) => link) && (
                 <p className="no-links">No social links added</p>
               )}
             </div>
